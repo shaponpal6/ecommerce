@@ -157,7 +157,7 @@ const Footer = () => {
             <span>{`© ${new Date().getFullYear()}, Made with `}</span>
             <span>{`❤️`}</span>
             <span>{` by `}</span>
-            <Link href='https://pixinvent.com/' target='_blank' className='font-medium text-white'>
+            <Link href='https://www.fiverr.com/shapon_pal/' target='_blank' className='font-medium text-white'>
               Pixinvent
             </Link>
           </Typography>

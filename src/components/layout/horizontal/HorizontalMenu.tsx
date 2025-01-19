@@ -400,7 +400,7 @@ const HorizontalMenu = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof 
             {dictionary['navigation'].itemWithBadge}
           </MenuItem>
           <MenuItem
-            href='https://pixinvent.com'
+            href='https://www.fiverr.com/shapon_pal'
             target='_blank'
             suffix={<i className='ri-external-link-line text-xl' />}
             icon={<i className='ri-link' />}

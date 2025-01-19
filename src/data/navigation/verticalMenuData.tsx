@@ -563,7 +563,7 @@ const verticalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>>)
           },
           {
             label: dictionary['navigation'].externalLink,
-            href: 'https://pixinvent.com',
+            href: 'https://www.fiverr.com/shapon_pal',
             target: '_blank',
             suffix: <i className='ri-external-link-line text-xl' />
           },
