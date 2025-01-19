@@ -29,6 +29,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 
 // Style Imports
 import navigationCustomStyles from '@core/styles/vertical/navigationCustomStyles'
+import EcommerceVerticalMenu from './EcommerceVerticalMenu'
 
 type Props = {
   dictionary: Awaited<ReturnType<typeof getDictionary>>
@@ -45,9 +46,8 @@ const StyledBoxForShadow = styled('div')(({ theme }) => ({
   width: 'calc(100% + 15px)',
   height: theme.mixins.toolbar.minHeight,
   transition: 'opacity .15s ease-in-out',
-  background: `linear-gradient(var(--mui-palette-background-default) ${
-    theme.direction === 'rtl' ? '95%' : '5%'
-  }, rgb(var(--mui-palette-background-defaultChannel) / 0.85) 30%, rgb(var(--mui-palette-background-defaultChannel) / 0.5) 65%, rgb(var(--mui-palette-background-defaultChannel) / 0.3) 75%, transparent)`,
+  background: `linear-gradient(var(--mui-palette-background-default) ${theme.direction === 'rtl' ? '95%' : '5%'
+    }, rgb(var(--mui-palette-background-defaultChannel) / 0.85) 30%, rgb(var(--mui-palette-background-defaultChannel) / 0.5) 65%, rgb(var(--mui-palette-background-defaultChannel) / 0.3) 75%, transparent)`,
   '&.scrolled': {
     opacity: 1
   }
@@ -128,8 +128,8 @@ const Navigation = (props: Props) => {
       // when semiDark is enabled and the mode or systemMode is light
       {...(isSemiDark &&
         !isDark && {
-          'data-dark': ''
-        })}
+        'data-dark': ''
+      })}
     >
       {/* Nav Header including Logo & nav toggle icons  */}
       <NavHeader>
@@ -147,7 +147,9 @@ const Navigation = (props: Props) => {
         )}
       </NavHeader>
       <StyledBoxForShadow ref={shadowRef} />
-      <VerticalMenu dictionary={dictionary} scrollMenu={scrollMenu} />
+
+      {/* <VerticalMenu dictionary={dictionary} scrollMenu={scrollMenu} /> */}
+      <EcommerceVerticalMenu dictionary={dictionary} scrollMenu={scrollMenu} />
     </VerticalNav>
   )
 }
