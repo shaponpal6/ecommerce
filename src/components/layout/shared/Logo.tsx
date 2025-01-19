@@ -12,6 +12,7 @@ import type { VerticalNavContextProps } from '@menu/contexts/verticalNavContext'
 
 // Component Imports
 import MaterializeLogo from '@core/svg/Logo'
+import LogoTextSVG from '@core/svg/LogoTextSVG'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'
@@ -82,7 +83,8 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
         transitionDuration={transitionDuration}
         isBreakpointReached={isBreakpointReached}
       >
-        {themeConfig.templateName}
+        {/* {themeConfig.templateName} */}
+        <LogoTextSVG />
       </LogoText>
     </div>
   )
