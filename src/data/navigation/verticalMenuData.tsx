@@ -539,14 +539,14 @@ const verticalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>>)
       {
         label: dictionary['navigation'].raiseSupport,
         icon: 'ri-lifebuoy-line',
-        href: 'https://pixinvent.ticksy.com',
+        href: 'https://shapon.ticksy.com',
         suffix: <i className='ri-external-link-line text-xl' />,
         target: '_blank'
       },
       {
         label: dictionary['navigation'].documentation,
         icon: 'ri-book-line',
-        href: 'https://demos.pixinvent.com/materialize-nextjs-admin-template/documentation',
+        href: 'https://demos.shapon.com/materialize-nextjs-admin-template/documentation',
         suffix: <i className='ri-external-link-line text-xl' />,
         target: '_blank'
       },

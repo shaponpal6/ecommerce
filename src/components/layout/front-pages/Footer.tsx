@@ -158,20 +158,20 @@ const Footer = () => {
             <span>{`❤️`}</span>
             <span>{` by `}</span>
             <Link href='https://www.fiverr.com/shapon_pal/' target='_blank' className='font-medium text-white'>
-              Pixinvent
+              Shapon
             </Link>
           </Typography>
           <div className='flex gap-1.5 items-center opacity-[0.78]'>
-            <IconButton component={Link} size='small' href='https://github.com/pixinvent' target='_blank'>
+            <IconButton component={Link} size='small' href='https://github.com/shapon' target='_blank'>
               <i className='ri-github-fill text-white text-lg' />
             </IconButton>
-            <IconButton component={Link} size='small' href='https://www.facebook.com/pixinvents/' target='_blank'>
+            <IconButton component={Link} size='small' href='https://www.facebook.com/shapons/' target='_blank'>
               <i className='ri-facebook-fill text-white text-lg' />
             </IconButton>
-            <IconButton component={Link} size='small' href='https://twitter.com/pixinvents' target='_blank'>
+            <IconButton component={Link} size='small' href='https://twitter.com/shapons' target='_blank'>
               <i className='ri-twitter-fill text-white text-lg' />
             </IconButton>
-            <IconButton component={Link} size='small' href='https://www.linkedin.com/company/pixinvent' target='_blank'>
+            <IconButton component={Link} size='small' href='https://www.linkedin.com/company/shapon' target='_blank'>
               <i className='ri-linkedin-fill text-white text-lg' />
             </IconButton>
           </div>

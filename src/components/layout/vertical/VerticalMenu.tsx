@@ -353,7 +353,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             {dictionary['navigation'].menuExamples}
           </MenuItem>
           <MenuItem
-            href='https://pixinvent.ticksy.com'
+            href='https://shapon.ticksy.com'
             suffix={<i className='ri-external-link-line text-xl' />}
             target='_blank'
             icon={<i className='ri-lifebuoy-line' />}
@@ -361,7 +361,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             {dictionary['navigation'].raiseSupport}
           </MenuItem>
           <MenuItem
-            href='https://demos.pixinvent.com/materialize-nextjs-admin-template/documentation'
+            href='https://demos.shapon.com/materialize-nextjs-admin-template/documentation'
             suffix={<i className='ri-external-link-line text-xl' />}
             target='_blank'
             icon={<i className='ri-book-line' />}

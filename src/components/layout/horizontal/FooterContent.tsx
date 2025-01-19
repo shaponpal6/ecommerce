@@ -25,7 +25,7 @@ const FooterContent = () => {
         <span>{`❤️`}</span>
         <span className='text-textSecondary'>{` by `}</span>
         <Link href='https://www.fiverr.com/shapon_pal/' target='_blank' className='text-primary uppercase'>
-          Pixinvent
+          Shapon
         </Link>
       </p>
       {!isBreakpointReached && (
@@ -33,17 +33,17 @@ const FooterContent = () => {
           <Link href='https://themeforest.net/licenses/standard' target='_blank' className='text-primary'>
             License
           </Link>
-          <Link href='https://themeforest.net/user/pixinvent/portfolio' target='_blank' className='text-primary'>
+          <Link href='https://themeforest.net/user/shapon/portfolio' target='_blank' className='text-primary'>
             More Themes
           </Link>
           <Link
-            href='https://demos.pixinvent.com/materialize-nextjs-admin-template/documentation'
+            href='https://demos.shapon.com/materialize-nextjs-admin-template/documentation'
             target='_blank'
             className='text-primary'
           >
             Documentation
           </Link>
-          <Link href='https://pixinvent.ticksy.com' target='_blank' className='text-primary'>
+          <Link href='https://shapon.ticksy.com' target='_blank' className='text-primary'>
             Support
           </Link>
         </div>
