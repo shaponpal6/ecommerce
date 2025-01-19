@@ -112,7 +112,8 @@ const Login = ({ mode }: { mode: Mode }) => {
 
     if (res && res.ok && res.error === null) {
       // Vars
-      const redirectURL = searchParams.get('redirectTo') ?? process.env.NEXT_PUBLIC_APP_URL + '/';
+      const redirectURL = searchParams.get('redirectTo') ?? '/';
+      // const redirectURL = searchParams.get('redirectTo') ?? process.env.NEXT_PUBLIC_APP_URL + '/';
       router.replace(getLocalizedUrl(redirectURL, locale as Locale));
     } else {
       if (res?.error) {
