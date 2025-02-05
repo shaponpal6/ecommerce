@@ -11,6 +11,7 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "build:icons": "tsx src/assets/iconify-icons/bundle-icons-css.ts",
+    "migrate:init": "npx prisma migrate dev --name init",
     "migrate": "dotenv -e .env -- npx prisma migrate dev",
     "postinstall": "prisma generate && npm run build:icons",
     "removeI18n": "tsx src/remove-translation-scripts/index.ts"

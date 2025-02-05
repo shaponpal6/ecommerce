@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -43,6 +43,16 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  role          UserRole    @default(CUSTOMER)
+  firstName     String?
+  lastName      String?
+  phone         String?
+  isActive      Boolean     @default(true)
+  metadata      String?     // Stored as serialized string instead of JSON
+  addresses     Address[]
+  orders        Order[]
+  cart          Cart?
+  wishlist      Wishlist?
 }
 
 model VerificationToken {
@@ -52,3 +62,711 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+// Enum Types
+enum UserRole {
+  ADMIN
+  MANAGER
+  SALES_AGENT
+  RETAILER
+  CUSTOMER
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  RETURNED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// Base Models
+model Language {
+  id        String   @id @default(cuid())
+  code      String   @unique // e.g., en, fr, de
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  translations          Translation[]
+  productTranslations   ProductTranslation[]
+  categoryTranslations  CategoryTranslation[]
+  brandTranslations     BrandTranslation[]
+  attributeTranslations AttributeTranslation[]
+  siteSettingTranslations SiteSettingTranslation[]
+  dynamicPageTranslations DynamicPageTranslation[]
+  pageSectionTranslations PageSectionTranslation[]
+  seoTranslations         SEOTranslation[]
+}
+
+model Translation {
+  id         String   @id @default(cuid())
+  entityType String // The table being translated
+  entityId   String // The ID of the record being translated
+  field      String // The field being translated
+  value      String // The translated value
+  languageId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  language Language @relation(fields: [languageId], references: [id])
+
+  @@unique([entityType, entityId, field, languageId])
+  @@index([entityType, entityId])
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  type        String // image, video, pdf, etc.
+  url         String
+  alt         String?
+  title       String?
+  size        Int?
+  mimeType    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  products     ProductMedia[]
+  categories   CategoryMedia[]
+  brands       BrandMedia[]
+}
+
+// Base Models for Dynamic Content & SEO
+model DynamicPage {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  type          String   // page, blog, product-category, etc.
+  layout        String?  // Stored as serialized JSON for page builder
+  isActive      Boolean  @default(true)
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  translations  DynamicPageTranslation[]
+  sections     PageSection[]
+  seo          SEO?
+}
+
+model DynamicPageTranslation {
+  id          String     @id @default(cuid())
+  pageId      String
+  languageId  String
+  title       String
+  content     String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  page        DynamicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  language    Language    @relation(fields: [languageId], references: [id])
+
+  @@unique([pageId, languageId])
+}
+
+model PageSection {
+  id          String   @id @default(cuid())
+  pageId      String
+  type        String   // hero, features, testimonials, etc.
+  content     String   @db.Text // Stored as serialized JSON
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  page        DynamicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  translations PageSectionTranslation[]
+}
+
+model PageSectionTranslation {
+  id          String      @id @default(cuid())
+  sectionId   String
+  languageId  String
+  content     String      @db.Text // Stored as serialized JSON
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  section     PageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  language    Language    @relation(fields: [languageId], references: [id])
+
+  @@unique([sectionId, languageId])
+}
+
+// SEO Model
+model SEO {
+  id              String    @id @default(cuid())
+  entityType      String    
+  entityId        String    @unique
+  canonicalUrl    String?
+  robots          String?
+  structuredData  String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  translations    SEOTranslation[]
+  product        Product?   @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "SEO_product_fkey")
+  category       Category?  @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "SEO_category_fkey")
+  brand          Brand?     @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "SEO_brand_fkey")
+  page           DynamicPage? @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "SEO_page_fkey")
+
+  @@index([entityType, entityId])
+}
+
+model SEOTranslation {
+  id          String   @id @default(cuid())
+  seoId       String
+  languageId  String
+  title       String
+  description String?  @db.Text
+  keywords    String?
+  ogTitle     String?
+  ogDescription String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  seo         SEO      @relation(fields: [seoId], references: [id], onDelete: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([seoId, languageId])
+}
+
+// Site Settings
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String?  @db.Text // Stored as serialized JSON if needed
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  translations SiteSettingTranslation[]
+}
+
+model SiteSettingTranslation {
+  id          String      @id @default(cuid())
+  settingId   String
+  languageId  String
+  value       String      @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  setting     SiteSetting @relation(fields: [settingId], references: [id], onDelete: Cascade)
+  language    Language    @relation(fields: [languageId], references: [id])
+
+  @@unique([settingId, languageId])
+}
+
+// Report Templates & Generated Reports
+model ReportTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // sales, inventory, customer, etc.
+  config      String   @db.Text // Stored as serialized JSON
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  reports     Report[]
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  templateId  String
+  name        String
+  parameters  String   @db.Text // Stored as serialized JSON
+  data        String   @db.Text // Stored as serialized JSON
+  format      String   // pdf, csv, excel
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  template    ReportTemplate @relation(fields: [templateId], references: [id])
+}
+
+// Existing models modified to support extensibility
+model Product {
+  id            String    @id @default(cuid())
+  sku           String    @unique
+  status        String    @default("DRAFT") // Using string instead of enum
+  price         Decimal
+  comparePrice  Decimal?
+  cost          Decimal?
+  quantity      Int       @default(0)
+  weight        Decimal?
+  isActive      Boolean   @default(true)
+  metadata      Json?     // Changed from String to Json
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  translations  ProductTranslation[]
+  categories   ProductCategory[]
+  attributes   ProductAttribute[]
+  media       ProductMedia[]
+  variations   ProductVariation[]
+  cartItems    CartItem[]
+  wishlistItems WishlistItem[]
+  orderItems   OrderItem[]
+  brand        Brand?     @relation(fields: [brandId], references: [id])
+  brandId      String?
+  seo          SEO?
+
+  @@index([status, isActive])
+}
+
+model ProductTranslation {
+  id          String   @id @default(cuid())
+  productId   String
+  languageId  String
+  name        String
+  description String?
+  metaTitle   String?
+  metaDesc    String?
+  keywords    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([productId, languageId])
+}
+
+model ProductVariation {
+  id        String   @id @default(cuid())
+  productId String
+  sku       String   @unique
+  price     Decimal?
+  quantity  Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product    Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributes ProductVariationAttribute[]
+  orderItems OrderItem[]
+
+  @@index([productId, isActive])
+}
+
+model Attribute {
+  id        String   @id @default(cuid())
+  type      String   // color, size, material, etc.
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  translations          AttributeTranslation[]
+  productAttributes     ProductAttribute[]
+  variationAttributes   ProductVariationAttribute[]
+}
+
+model AttributeTranslation {
+  id          String    @id @default(cuid())
+  attributeId String
+  languageId  String
+  name        String
+  value       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  language    Language  @relation(fields: [languageId], references: [id])
+
+  @@unique([attributeId, languageId])
+}
+
+model ProductAttribute {
+  id          String   @id @default(cuid())
+  productId   String
+  attributeId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute   Attribute @relation(fields: [attributeId], references: [id])
+
+  @@unique([productId, attributeId])
+}
+
+model ProductVariationAttribute {
+  id          String   @id @default(cuid())
+  variationId String
+  attributeId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  variation   ProductVariation @relation(fields: [variationId], references: [id], onDelete: Cascade)
+  attribute   Attribute       @relation(fields: [attributeId], references: [id])
+
+  @@unique([variationId, attributeId])
+}
+
+// Category Related Models
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  parentId  String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  translations    CategoryTranslation[]
+  products        ProductCategory[]
+  media           CategoryMedia[]
+  parent          Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children        Category[] @relation("CategoryHierarchy")
+  seo             SEO[]
+}
+
+model CategoryTranslation {
+  id          String   @id @default(cuid())
+  categoryId  String
+  languageId  String
+  name        String
+  description String?
+  metaTitle   String?
+  metaDesc    String?
+  keywords    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([categoryId, languageId])
+}
+
+// Brand Related Models
+model Brand {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  translations BrandTranslation[]
+  products     Product[]
+  media       BrandMedia[]
+  seo         SEO[]
+}
+
+model BrandTranslation {
+  id          String   @id @default(cuid())
+  brandId     String
+  languageId  String
+  name        String
+  description String?
+  metaTitle   String?
+  metaDesc    String?
+  keywords    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([brandId, languageId])
+}
+
+// Relationship Models
+model ProductCategory {
+  id         String   @id @default(cuid())
+  productId  String
+  categoryId String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, categoryId])
+}
+
+model ProductMedia {
+  id        String   @id @default(cuid())
+  productId String
+  mediaId   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media     Media    @relation(fields: [mediaId], references: [id])
+
+  @@unique([productId, mediaId])
+}
+
+model CategoryMedia {
+  id         String   @id @default(cuid())
+  categoryId String
+  mediaId    String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  media      Media    @relation(fields: [mediaId], references: [id])
+
+  @@unique([categoryId, mediaId])
+}
+
+model BrandMedia {
+  id        String   @id @default(cuid())
+  brandId   String
+  mediaId   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  media     Media    @relation(fields: [mediaId], references: [id])
+
+  @@unique([brandId, mediaId])
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // billing, shipping
+  firstName   String
+  lastName    String
+  company     String?
+  address1    String
+  address2    String?
+  city        String
+  state       String?
+  postalCode  String
+  country     String
+  phone       String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders      Order[]
+
+  @@index([userId, type])
+}
+
+// Store Related Models
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  address1    String
+  address2    String?
+  city        String
+  state       String?
+  postalCode  String
+  country     String
+  phone       String?
+  email       String?
+  latitude    Decimal?
+  longitude   Decimal?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([latitude, longitude])
+}
+
+// Cart & Wishlist Models
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String         @unique
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  // Relations
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     WishlistItem[]
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  wishlistId String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  wishlist  Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([wishlistId, productId])
+}
+
+// Order Related Models
+model Order {
+  id              String        @id @default(cuid())
+  userId          String
+  addressId       String
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  subtotal        Decimal
+  tax            Decimal
+  shipping       Decimal
+  discount       Decimal       @default(0)
+  total          Decimal
+  notes          String?
+  metadata       String?       // Stored as serialized string instead of JSON
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  user           User          @relation(fields: [userId], references: [id])
+  address        Address       @relation(fields: [addressId], references: [id])
+  items          OrderItem[]
+  transactions   Transaction[]
+
+  @@index([userId, status])
+  @@index([status, paymentStatus])
+}
+
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  productId       String
+  variationId     String?
+  quantity        Int
+  price           Decimal
+  discount        Decimal  @default(0)
+  total           Decimal
+  metadata        String?   // Stored as serialized string instead of JSON
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  order           Order    @relation(fields: [orderId], references: [id])
+  product         Product  @relation(fields: [productId], references: [id])
+  variation       ProductVariation? @relation(fields: [variationId], references: [id])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  orderId     String
+  type        String   // payment, refund
+  status      String
+  amount      Decimal
+  provider    String
+  reference   String?
+  metadata    String?   // Stored as serialized string instead of JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  order       Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId, type])
+}
+
+// Promotion Related Models
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        String   // percentage, fixed
+  value       Decimal
+  minAmount   Decimal?
+  maxAmount   Decimal?
+  startDate   DateTime
+  endDate     DateTime
+  usageLimit  Int?
+  usageCount  Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code, isActive])
+  @@index([startDate, endDate])
+}
+
+model Contact {
+  id          String   @id @default(uuid()) // Unique identifier
+  name        String   @db.VarChar(255) // Full name of the sender
+  email       String   @db.VarChar(255) // Sender's email
+  phone       String?  @db.VarChar(50)  // Optional phone number
+  subject     String   @db.VarChar(255) // Subject of the message
+  message     String   @db.Text         // Full message content
+  status      ContactStatus @default(PENDING) // Status of the inquiry
+  createdAt   DateTime @default(now()) // Timestamp of submission
+  updatedAt   DateTime @updatedAt      // Auto-updated timestamp
+}
+
+enum ContactStatus {
+  PENDING     // Newly submitted
+  IN_PROGRESS // Being processed
+  RESOLVED    // Responded and closed
+  SPAM        // Marked as spam
+}
+
