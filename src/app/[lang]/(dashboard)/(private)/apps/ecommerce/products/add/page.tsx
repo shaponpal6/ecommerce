@@ -24,9 +24,9 @@ const eCommerceProductsAdd = () => {
           <Grid size={{ xs: 12 }}>
             <ProductImage />
           </Grid>
-          <Grid size={{ xs: 12 }}>
+          {/* <Grid size={{ xs: 12 }}>
             <ProductVariants />
-          </Grid>
+          </Grid> */}
           <Grid size={{ xs: 12 }}>
             <ProductInventory />
           </Grid>
@@ -41,6 +41,9 @@ const eCommerceProductsAdd = () => {
             <ProductOrganize />
           </Grid>
         </Grid>
+      </Grid>
+      <Grid size={{ xs: 12 }}>
+        <ProductVariants />
       </Grid>
     </Grid>
   )

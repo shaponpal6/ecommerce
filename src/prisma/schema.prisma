@@ -317,6 +317,7 @@ model Product {
   sku           String    @unique
   status        String    @default("DRAFT") // Using string instead of enum
   price         Decimal
+  discountPrice Decimal? 
   comparePrice  Decimal?
   cost          Decimal?
   quantity      Int       @default(0)
@@ -365,7 +366,10 @@ model ProductVariation {
   id        String   @id @default(cuid())
   productId String
   sku       String   @unique
-  price     Decimal?
+  price         Decimal
+  discountPrice Decimal?
+  comparePrice  Decimal?
+  cost          Decimal?
   quantity  Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

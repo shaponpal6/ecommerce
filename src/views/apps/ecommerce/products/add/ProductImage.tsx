@@ -1,9 +1,7 @@
 'use client'
 
-// React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-// MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
@@ -14,128 +12,201 @@ import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
+import Tab from '@mui/material/Tab'
+import TabContext from '@mui/lab/TabContext'
+import TabPanel from '@mui/lab/TabPanel'
+import Grid from '@mui/material/Grid'
 
-// Third-party Imports
 import { useDropzone } from 'react-dropzone'
 
-// Component Imports
+import CustomTabList from '@core/components/mui/TabList'
 import Link from '@components/Link'
 import CustomAvatar from '@core/components/mui/Avatar'
-
-// Styled Component Imports
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 
-type FileProp = {
-  name: string
-  type: string
-  size: number
+interface ImageFile extends File {
+  preview?: string
 }
 
-// Styled Dropzone Component
+interface ProductImageProps {
+  defaultImage?: string
+  defaultGallery?: string[]
+  onImageChange?: (mainImage: File | null, galleryImages: File[]) => void
+}
+
+// Styled Components
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
     minHeight: 'unset',
-    padding: theme.spacing(12),
+    padding: theme.spacing(6),
+    border: `2px dashed ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
     [theme.breakpoints.down('sm')]: {
-      paddingInline: theme.spacing(5)
-    },
-    '&+.MuiList-root .MuiListItem-root .file-name': {
-      fontWeight: theme.typography.body1.fontWeight
+      paddingInline: theme.spacing(4)
     }
   }
 }))
 
-const ProductImage = () => {
-  // States
-  const [files, setFiles] = useState<File[]>([])
+const ImagePreview = styled('div')(({ theme }) => ({
+  position: 'relative',
+  width: '100%',
+  height: 200,
+  borderRadius: theme.shape.borderRadius,
+  overflow: 'hidden',
+  '& img': {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover'
+  }
+}))
 
-  // Hooks
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles.map((file: File) => Object.assign(file)))
+const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: ProductImageProps) => {
+  const [activeTab, setActiveTab] = useState('main')
+  const [mainImage, setMainImage] = useState<ImageFile | null>(null)
+  const [galleryImages, setGalleryImages] = useState<ImageFile[]>([])
+
+  useEffect(() => {
+    // Initialize with default values if provided
+    if (defaultImage) {
+      fetch(defaultImage)
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], 'main-image.jpg', { type: 'image/jpeg' })
+
+          setMainImage(Object.assign(file, { preview: defaultImage }))
+        })
+    }
+
+    if (defaultGallery.length > 0) {
+      Promise.all(
+        defaultGallery.map(url =>
+          fetch(url)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], `gallery-${Math.random()}.jpg`, { type: 'image/jpeg' })
+
+
+              return Object.assign(file, { preview: url })
+            })
+        )
+      ).then(files => setGalleryImages(files))
+    }
+  }, [defaultImage, defaultGallery])
+
+  const mainDropzone = useDropzone({
+    accept: { 'image/*': [] },
+    maxFiles: 1,
+    onDrop: acceptedFiles => {
+      const file = Object.assign(acceptedFiles[0], {
+        preview: URL.createObjectURL(acceptedFiles[0])
+      })
+
+      setMainImage(file)
+      onImageChange?.(file, galleryImages)
     }
   })
 
-  const renderFilePreview = (file: FileProp) => {
-    if (file.type.startsWith('image')) {
-      return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file as any)} />
-    } else {
-      return <i className='ri-file-text-line' />
+  const galleryDropzone = useDropzone({
+    accept: { 'image/*': [] },
+    onDrop: acceptedFiles => {
+      const newFiles = acceptedFiles.map(file =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file)
+        })
+      )
+
+      setGalleryImages(prev => [...prev, ...newFiles])
+      onImageChange?.(mainImage, [...galleryImages, ...newFiles])
     }
+  })
+
+  const handleRemoveMainImage = () => {
+    setMainImage(null)
+    onImageChange?.(null, galleryImages)
   }
 
-  const handleRemoveFile = (file: FileProp) => {
-    const uploadedFiles = files
-    const filtered = uploadedFiles.filter((i: FileProp) => i.name !== file.name)
+  const handleRemoveGalleryImage = (index: number) => {
+    const newGallery = galleryImages.filter((_, i) => i !== index)
 
-    setFiles([...filtered])
-  }
-
-  const fileList = files.map((file: FileProp) => (
-    <ListItem key={file.name} className='pis-4 plb-3'>
-      <div className='file-details'>
-        <div className='file-preview'>{renderFilePreview(file)}</div>
-        <div>
-          <Typography className='file-name font-medium' color='text.primary'>
-            {file.name}
-          </Typography>
-          <Typography className='file-size' variant='body2'>
-            {Math.round(file.size / 100) / 10 > 1000
-              ? `${(Math.round(file.size / 100) / 10000).toFixed(1)} mb`
-              : `${(Math.round(file.size / 100) / 10).toFixed(1)} kb`}
-          </Typography>
-        </div>
-      </div>
-      <IconButton onClick={() => handleRemoveFile(file)}>
-        <i className='ri-close-line text-xl' />
-      </IconButton>
-    </ListItem>
-  ))
-
-  const handleRemoveAllFiles = () => {
-    setFiles([])
+    setGalleryImages(newGallery)
+    onImageChange?.(mainImage, newGallery)
   }
 
   return (
-    <Dropzone>
-      <Card>
+    <Card>
+      <TabContext value={activeTab}>
         <CardHeader
-          title='Product Image'
+          title='Product Images'
           action={
-            <Typography component={Link} color='primary.main' className='font-medium'>
-              Add media from URL
-            </Typography>
+            <CustomTabList onChange={(_, value) => setActiveTab(value)}>
+              <Tab value='main' label='Main Image' />
+              <Tab value='gallery' label='Gallery' />
+            </CustomTabList>
           }
-          sx={{ '& .MuiCardHeader-action': { alignSelf: 'center' } }}
         />
         <CardContent>
-          <div {...getRootProps({ className: 'dropzone' })}>
-            <input {...getInputProps()} />
-            <div className='flex items-center flex-col gap-2 text-center'>
-              <CustomAvatar variant='rounded' skin='light' color='secondary'>
-                <i className='ri-upload-2-line' />
-              </CustomAvatar>
-              <Typography variant='h4'>Drag and Drop Your Image Here.</Typography>
-              <Typography color='text.disabled'>or</Typography>
-              <Button variant='outlined' size='small'>
-                Browse Image
-              </Button>
-            </div>
-          </div>
-          {files.length ? (
-            <>
-              <List>{fileList}</List>
-              <div className='buttons'>
-                <Button color='error' variant='outlined' onClick={handleRemoveAllFiles}>
-                  Remove All
-                </Button>
-                <Button variant='contained'>Upload Files</Button>
+          <TabPanel value='main'>
+            <Dropzone>
+              <div {...mainDropzone.getRootProps({ className: 'dropzone' })}>
+                <input {...mainDropzone.getInputProps()} />
+                {mainImage ? (
+                  <ImagePreview>
+                    <img src={mainImage.preview} alt='Main product' />
+                    <IconButton
+                      onClick={handleRemoveMainImage}
+                      sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper' }}
+                    >
+                      <i className='ri-close-line' />
+                    </IconButton>
+                  </ImagePreview>
+                ) : (
+                  <div className='flex items-center flex-col gap-2 text-center'>
+                    <CustomAvatar variant='rounded' skin='light' color='primary'>
+                      <i className='ri-upload-2-line' />
+                    </CustomAvatar>
+                    <Typography variant='h6'>Drop main product image here</Typography>
+                    <Typography color='text.secondary'>or click to browse</Typography>
+                  </div>
+                )}
               </div>
-            </>
-          ) : null}
+            </Dropzone>
+          </TabPanel>
+
+          <TabPanel value='gallery'>
+            <Dropzone>
+              <div {...galleryDropzone.getRootProps({ className: 'dropzone' })}>
+                <input {...galleryDropzone.getInputProps()} />
+                <div className='flex items-center flex-col gap-2 text-center'>
+                  <CustomAvatar variant='rounded' skin='light' color='primary'>
+                    <i className='ri-upload-cloud-line' />
+                  </CustomAvatar>
+                  <Typography variant='h6'>Drop gallery images here</Typography>
+                  <Typography color='text.secondary'>or click to browse</Typography>
+                </div>
+              </div>
+            </Dropzone>
+
+            {galleryImages.length > 0 && (
+              <Grid container spacing={2} className='mbs-4'>
+                {galleryImages.map((file, index) => (
+                  <Grid key={index} xs={12} sm={6} md={4}>
+                    <ImagePreview>
+                      <img src={file.preview} alt={`Gallery ${index + 1}`} />
+                      <IconButton
+                        onClick={() => handleRemoveGalleryImage(index)}
+                        sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper' }}
+                      >
+                        <i className='ri-close-line' />
+                      </IconButton>
+                    </ImagePreview>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </TabPanel>
         </CardContent>
-      </Card>
-    </Dropzone>
+      </TabContext>
+    </Card>
   )
 }
 

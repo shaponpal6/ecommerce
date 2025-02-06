@@ -2,7 +2,7 @@
 
 // MUI Imports
 import Divider from '@mui/material/Divider'
-import Grid from '@mui/material/Grid2'
+import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
@@ -23,6 +23,13 @@ import CustomIconButton from '@core/components/mui/IconButton'
 
 // Style Imports
 import '@/libs/styles/tiptapEditor.css'
+
+interface ProductInformationProps {
+  initialProductName?: string
+  initialSKU?: string
+  initialBarcode?: string
+  initialDescription?: string
+}
 
 const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
@@ -111,7 +118,12 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
   )
 }
 
-const ProductInformation = () => {
+const ProductInformation = ({
+  initialProductName = 'iPhone 14',
+  initialSKU = 'FXSK123U',
+  initialBarcode = '0123-4567',
+  initialDescription = ''
+}: ProductInformationProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -123,12 +135,7 @@ const ProductInformation = () => {
       }),
       Underline
     ],
-    immediatelyRender: false,
-    content: `
-      <p>
-        Keep your account secure with authentication step.
-      </p>
-    `
+    content: initialDescription
   })
 
   return (
@@ -136,14 +143,29 @@ const ProductInformation = () => {
       <CardHeader title='Product Information' />
       <CardContent>
         <Grid container spacing={5} className='mbe-5'>
-          <Grid size={{ xs: 12 }}>
-            <TextField fullWidth label='Product Name' placeholder='iPhone 14' />
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label='Product Name'
+              placeholder='iPhone 14'
+              defaultValue={initialProductName}
+            />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label='SKU' placeholder='FXSK123U' />
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label='SKU'
+              placeholder='FXSK123U'
+              defaultValue={initialSKU}
+            />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label='Barcode' placeholder='0123-4567' />
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label='Barcode'
+              placeholder='0123-4567'
+              defaultValue={initialBarcode}
+            />
           </Grid>
         </Grid>
         <Typography className='mbe-1'>Description (Optional)</Typography>

@@ -1,0 +1,6 @@
+redisign this product add/edit component
+1st section [left] - product info like - title, sku, desc, 
+1st section [right] add a language switcher - English, Franch, Europe, Arabic and Currency Switcher - Doller, pound, taka, ... [sync those togather]
+2nd section [left] - product media - thumbnail(Product Image), Image Gallary [use tab]
+2nd section [Left] - add pricing section - price,discountPrice,comparePrice,cost,quantity,weight and other
+2nd section [right] - add category section - Store, Collections, category, Tags, 

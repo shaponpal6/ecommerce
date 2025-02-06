@@ -1,0 +1,178 @@
+## E-Commerce Platform Requirements
+
+### **Project Overview**
+The project is to build a scalable e-commerce platform using React (Next.js) for the frontend and Node.js (with Prisma ORM and MySQL) for the backend. The platform will cater to B2B, B2C, retailers, and wholesalers, specifically selling female business shirts. Initially, the website will serve as a product catalog with a "Find a Store" feature instead of a shopping cart. The platform will support multiple sales channels, multilingual support, and geolocation-based experiences.
+
+---
+### **1. General Website Requirements**
+- **Coming Soon Page:** A minimalistic page with social media links and newsletter signup.
+- **Page Loader:** Custom animated loader displaying the logo and progress.
+- **Cookie Consent:** A minimalistic cookie bar requiring user acceptance before website access.
+- **Web Pages:**
+  - Home
+  - Product Page
+  - All Products
+  - Blog (Magazine)
+  - Store Locator
+  - Book an Appointment
+  - About Us
+  - Contact Us
+  - Careers
+  - Legal, Terms & Conditions, Privacy Policy
+  - Showroom
+  - Collections
+  - Size Guide
+  - Become a Retailer
+  - Help (FAQ)
+  - Sitemap
+
+---
+### **2. Design & UX**
+- Fully **responsive** for desktop, tablet, and mobile.
+- Minimalist, **user-friendly** UI.
+- **Admin Panel** with dashboards, reports, and role-based access control.
+- **UI Inspiration:**
+  - Navigation animations
+  - Hero and navigation bar
+  - Video Boxes Hero
+  - Footer extensions
+
+---
+### **3. E-Commerce Functionality**
+#### **Custom Dashboards:**
+- **Sales Dashboard:** KPIs for sales performance.
+- **Order Management:** Stock levels, low-stock alerts, backorders.
+- **Retail Performance Dashboard:** Sales tracking.
+- **Marketing Dashboard:** CTAs and analytics.
+- **Infrastructure Dashboard:** System health and performance.
+- **CEO Dashboard:** Overview of key business metrics.
+
+#### **Product Inventory Management:**
+- **Unlimited products** with variations (sizes, colors, article numbers).
+- **Custom cost fields** (fabric cost, labor cost, etc.).
+- **Bulk product import/export** (CSV/API).
+- **Supply & demand forecasting.**
+- **Purchase order & supplier management.**
+
+#### **Shipping & Tax:**
+- Integration with **DHL** for B2B shipping.
+- **Real-time shipping rates** and tax calculations.
+- Multiple shipping options: Free, Flat rate, Local pickup.
+
+#### **Discounts & Coupons:**
+- **Dynamic discount codes** and promotional offers.
+- **Gift card support.**
+
+#### **Customer Accounts:**
+- **User accounts with role-based access.**
+- **Retailers & Sales Agents** have different pricing & permissions.
+
+#### **Multilingual & Currency Support:**
+- **Geolocation-based language and currency.**
+- **Manual language/currency selection if geolocation fails.**
+
+#### **Sales Channels:**
+- **Retailers & Agents have individual portals.**
+- **Wholesale pricing & order customization.**
+- **Retailers under Agents have special commercial terms.**
+
+#### **Find a Store Feature:**
+- **Replaces "Add to Cart" with Store Locator.**
+
+---
+### **4. Database Schema (Prisma - MySQL)**
+#### **Core Tables:**
+- **Users:** Standard authentication, roles (Admin, CEO, Employee, Sales Agent, Intern, etc.).
+- **Customers:** Retailers, Agents, B2B customers.
+- **Products:** Clothing-specific details, multilingual support.
+- **Product Variations:** Dynamic attributes (color, size, etc.).
+- **Categories & Tags:** Multilingual support.
+- **Brands:** Associated with products, localized.
+- **Inventory Management:** Tracks stock, suppliers, purchase orders.
+- **Sales & Coupons:** Flash Sales, Hot Sales, Coupon Codes.
+- **Orders:** Tracks status (RETURN, DAMAGE), payments, shipping, returns.
+- **Shipping & Taxes:** Shipping methods, tax rates.
+- **Wishlist & Cart:** Standard implementations.
+- **Store Locator:** Find a store functionality.
+- **Media Manager:** Handles images, PDFs, videos, and files.
+- **SEO & Meta Data:** Supports product and order metadata.
+- **Reports & Analytics:** Sales, products, marketing insights.
+
+---
+### **5. Security & Compliance**
+- **GDPR Compliance:** Data protection regulations.
+- **Secure Cookies & Authentication.**
+- **Role-Based Access Control (RBAC).**
+- **Regular Software Updates & Backups.**
+- **SSL Encryption.**
+- **Security Audits & Protection.**
+
+---
+### **6. SEO & Marketing**
+- **SEO Optimization:** Metadata, structured data, keyword strategy.
+- **Blog Integration:** For content marketing.
+- **Email Marketing:** Mailchimp/Klaviyo integration.
+- **Social Media:** Shareable product pages, Instagram tagging.
+- **Google Analytics, Facebook Pixel, Clarity.**
+
+---
+### **7. Performance Optimization**
+- **Caching & CDN Integration.**
+- **Image Optimization:** WebP format.
+- **Lazy Loading for improved speed.**
+
+---
+### **8. Scalability & Extensibility**
+- **Modular component-based development.**
+- **Version control for codebase management.**
+- **Data-driven decision-making with reports.**
+
+---
+### **9. Testing & Quality Assurance**
+- **Cross-browser & device compatibility.**
+- **Performance & Load Testing.**
+- **Automated Testing & QA processes.**
+- **Data Quality Assurance.**
+- **Regular Report Generation.**
+
+---
+### **10. Competitor Analysis**
+- **https://bymalina.com/eu/**
+- **https://barons.nl/**
+- **https://www.charlestyrwhitt.com/eu/home**
+- **https://us.oliviavonhalle.com/**
+
+---
+### **11. Custom URL Structure**
+- mydomain.com/en-ww
+- mydomain.com/en-ww/collections/all
+- mydomain.com/en-ww/magazine
+- mydomain.com/en-ww/retailer
+- mydomain.com/en-ww/appointment
+- mydomain.com/en-ww/about
+- mydomain.com/en-ww/contact
+- mydomain.com/en-ww/careers
+- mydomain.com/en-ww/legal
+- mydomain.com/en-ww/terms
+- mydomain.com/en-ww/privacy
+- mydomain.com/en-ww/showroom
+- mydomain.com/en-ww/size
+- mydomain.com/en-ww/become-a-retailer
+- mydomain.com/en-ww/help
+- mydomain.com/en-ww/sitemap
+- Admin: **mydomain.com/admin** (Custom naming required)
+- B2B Portal: **mydomain.com/b2b**
+
+---
+### **12. Appendix - Typical Order Workflow**
+- Order placed
+- Payment processed
+- Stock deducted
+- Order packed & shipped
+- Customer notified
+- Order delivered
+- Return/Damage processing if required
+
+---
+This document ensures all technical and business requirements are covered for a scalable, high-performance, and secure e-commerce platform. 🚀
+
