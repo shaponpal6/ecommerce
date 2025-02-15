@@ -53,6 +53,7 @@ model User {
   orders        Order[]
   cart          Cart?
   wishlist      Wishlist?
+  appointment   Appointment[]
 }
 
 model VerificationToken {
@@ -114,6 +115,7 @@ model Language {
   dynamicPageTranslations DynamicPageTranslation[]
   pageSectionTranslations PageSectionTranslation[]
   seoTranslations         SEOTranslation[]
+  productCategoryTranslations ProductCategoryTranslation[]
 }
 
 model Translation {
@@ -524,6 +526,7 @@ model ProductCategory {
   // Relations
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  translations ProductCategoryTranslation[]
 
   @@unique([productId, categoryId])
 }
@@ -772,5 +775,64 @@ enum ContactStatus {
   IN_PROGRESS // Being processed
   RESOLVED    // Responded and closed
   SPAM        // Marked as spam
+}
+
+model ProductCategoryTranslation {
+  id          String   @id @default(cuid())
+  categoryId  String
+  languageId  String
+  name        String
+  description String?
+  metaTitle   String?
+  metaDesc    String?
+  keywords    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  category    ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  language    Language       @relation(fields: [languageId], references: [id])
+
+  @@unique([categoryId, languageId])
+}
+
+
+// Currency Management
+model Currency {
+  id            String   @id @default(cuid())
+  code          String   @unique // USD, EUR, etc.
+  symbol        String   // $, €, etc.
+  exchangeRate  Decimal  @default(1)
+  isDefault     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Appointment System
+model Appointment {
+  id          String   @id @default(cuid())
+  userId      String?
+  name        String
+  email       String
+  phone       String?
+  date        DateTime
+  time        String
+  status      String   // PENDING, CONFIRMED, CANCELLED
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id])
+}
+
+// Newsletter Subscription
+model NewsletterSubscription {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 

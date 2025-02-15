@@ -1,7 +1,7 @@
 ## E-Commerce Platform Requirements
 
 ### **Project Overview**
-The project is to build a scalable e-commerce platform using React (Next.js) for the frontend and Node.js (with Prisma ORM and MySQL) for the backend. The platform will cater to B2B, B2C, retailers, and wholesalers, specifically selling female business shirts. Initially, the website will serve as a product catalog with a "Find a Store" feature instead of a shopping cart. The platform will support multiple sales channels, multilingual support, and geolocation-based experiences.
+The project is to build a scalable e-commerce platform using React (Next.js) for the frontend and Node.js (with Prisma ORM and MySQL) for the backend. The platform will cater to B2B, B2C, retailers, and wholesalers, specifically selling female business shirts. Initially, the website will serve as a product catalog with a "Find a Store" feature instead of a shopping cart. The platform will support multiple sales channels, multilingual support, multi-currency pricing, and geolocation-based experiences.
 
 ---
 ### **1. General Website Requirements**
@@ -39,6 +39,8 @@ The project is to build a scalable e-commerce platform using React (Next.js) for
 
 ---
 ### **3. E-Commerce Functionality**
+
+*It might help to detail how product variations will be handled in the UI to improve clarity.*
 #### **Custom Dashboards:**
 - **Sales Dashboard:** KPIs for sales performance.
 - **Order Management:** Stock levels, low-stock alerts, backorders.
@@ -67,9 +69,12 @@ The project is to build a scalable e-commerce platform using React (Next.js) for
 - **User accounts with role-based access.**
 - **Retailers & Sales Agents** have different pricing & permissions.
 
-#### **Multilingual & Currency Support:**
+#### **Multilingual & Multi-Currency Support (Top Priority):**
 - **Geolocation-based language and currency.**
 - **Manual language/currency selection if geolocation fails.**
+- **Multi-currency pricing** dynamically calculated based on origin and exchange rates.
+- **Synchronized with multi-language settings** to provide consistent user experience.
+- **All calculations, reports, and invoices** must reflect the selected currency and language.
 
 #### **Sales Channels:**
 - **Retailers & Agents have individual portals.**
@@ -97,6 +102,27 @@ The project is to build a scalable e-commerce platform using React (Next.js) for
 - **Media Manager:** Handles images, PDFs, videos, and files.
 - **SEO & Meta Data:** Supports product and order metadata.
 - **Reports & Analytics:** Sales, products, marketing insights.
+- **Currency Management:** Stores supported currencies, exchange rates, and calculation logic.
+
+**Performance Optimization:**
+- **Ensure indexing on key columns** like 'Orders', 'Products', and 'Customers' for performance.
+#### **Core Tables:**
+- **Users:** Standard authentication, roles (Admin, CEO, Employee, Sales Agent, Intern, etc.).
+- **Customers:** Retailers, Agents, B2B customers.
+- **Products:** Clothing-specific details, multilingual support.
+- **Product Variations:** Dynamic attributes (color, size, etc.).
+- **Categories & Tags:** Multilingual support.
+- **Brands:** Associated with products, localized.
+- **Inventory Management:** Tracks stock, suppliers, purchase orders.
+- **Sales & Coupons:** Flash Sales, Hot Sales, Coupon Codes.
+- **Orders:** Tracks status (RETURN, DAMAGE), payments, shipping, returns.
+- **Shipping & Taxes:** Shipping methods, tax rates.
+- **Wishlist & Cart:** Standard implementations.
+- **Store Locator:** Find a store functionality.
+- **Media Manager:** Handles images, PDFs, videos, and files.
+- **SEO & Meta Data:** Supports product and order metadata.
+- **Reports & Analytics:** Sales, products, marketing insights.
+- **Currency Management:** Stores supported currencies, exchange rates, and calculation logic.
 
 ---
 ### **5. Security & Compliance**
@@ -120,12 +146,14 @@ The project is to build a scalable e-commerce platform using React (Next.js) for
 - **Caching & CDN Integration.**
 - **Image Optimization:** WebP format.
 - **Lazy Loading for improved speed.**
+- **Optimized currency calculation** to minimize performance overhead.
 
 ---
 ### **8. Scalability & Extensibility**
 - **Modular component-based development.**
 - **Version control for codebase management.**
 - **Data-driven decision-making with reports.**
+- **Extendable currency and language logic** for future expansions.
 
 ---
 ### **9. Testing & Quality Assurance**
@@ -134,6 +162,7 @@ The project is to build a scalable e-commerce platform using React (Next.js) for
 - **Automated Testing & QA processes.**
 - **Data Quality Assurance.**
 - **Regular Report Generation.**
+- **Currency calculation tests** for accuracy across all origins.
 
 ---
 ### **10. Competitor Analysis**
