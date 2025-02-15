@@ -116,6 +116,9 @@ model Language {
   pageSectionTranslations PageSectionTranslation[]
   seoTranslations         SEOTranslation[]
   productCategoryTranslations ProductCategoryTranslation[]
+  countries           CountryLanguage[]
+  countryTranslations CountryTranslation[]
+  stateTranslations   StateTranslation[]
 }
 
 model Translation {
@@ -330,10 +333,11 @@ model Product {
   updatedAt     DateTime  @updatedAt
 
   // Relations
+  prices        ProductPrice[]
   translations  ProductTranslation[]
   categories   ProductCategory[]
   attributes   ProductAttribute[]
-  media       ProductMedia[]
+  media        ProductMedia[]
   variations   ProductVariation[]
   cartItems    CartItem[]
   wishlistItems WishlistItem[]
@@ -368,19 +372,16 @@ model ProductVariation {
   id        String   @id @default(cuid())
   productId String
   sku       String   @unique
-  price         Decimal
-  discountPrice Decimal?
-  comparePrice  Decimal?
-  cost          Decimal?
   quantity  Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  product    Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  attributes ProductVariationAttribute[]
-  orderItems OrderItem[]
+  prices      ProductVariationPrice[]
+  product     Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributes  ProductVariationAttribute[]
+  orderItems  OrderItem[]
 
   @@index([productId, isActive])
 }
@@ -597,6 +598,8 @@ model Address {
   // Relations
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders      Order[]
+  country     Country   @relation(fields: [countryId], references: [id])
+  state       State?    @relation(fields: [stateId], references: [id])
 
   @@index([userId, type])
 }
@@ -618,6 +621,14 @@ model Store {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  countryId   String
+  stateId     String?
+
+  // Relations
+  country     Country   @relation(fields: [countryId], references: [id])
+  state       State?    @relation(fields: [stateId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       CartItem[]
 
   @@index([latitude, longitude])
 }
@@ -807,6 +818,12 @@ model Currency {
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Relations
+  productPrices         ProductPrice[]
+  variationPrices       ProductVariationPrice[]
+  supportedOrigins      CurrencyOrigin[]
+  countries    CountryCurrency[]
 }
 
 // Appointment System
@@ -834,5 +851,170 @@ model NewsletterSubscription {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Add this model for product pricing
+model ProductPrice {
+  id          String   @id @default(cuid())
+  productId   String
+  currencyId  String
+  origin      String   // matches with Language code (e.g., en-US, de-DE)
+  price       Decimal
+  discountPrice Decimal?
+  comparePrice  Decimal?
+  cost         Decimal?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  currency    Currency @relation(fields: [currencyId], references: [id])
+
+  @@unique([productId, currencyId, origin])
+  @@index([origin, isActive])
+}
+
+// Add this model for variation pricing
+model ProductVariationPrice {
+  id           String   @id @default(cuid())
+  variationId  String
+  currencyId   String
+  origin       String   // matches with Language code
+  price        Decimal
+  discountPrice Decimal?
+  comparePrice  Decimal?
+  cost         Decimal?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  variation    ProductVariation @relation(fields: [variationId], references: [id], onDelete: Cascade)
+  currency     Currency        @relation(fields: [currencyId], references: [id])
+
+  @@unique([variationId, currencyId, origin])
+  @@index([origin, isActive])
+}
+
+// Add this model to manage currency-origin relationships
+model CurrencyOrigin {
+  id          String   @id @default(cuid())
+  currencyId  String
+  origin      String   // matches with Language code
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  currency    Currency @relation(fields: [currencyId], references: [id])
+
+  @@unique([currencyId, origin])
+  @@index([origin, isActive])
+}
+
+// Country and Region Management
+model Country {
+  id          String   @id @default(cuid())
+  code        String   @unique // ISO 3166-1 alpha-2 code (e.g., US, GB)
+  name        String   // Default English name
+  phoneCode   String?  // e.g., +1, +44
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  languages   CountryLanguage[]
+  currencies  CountryCurrency[]
+  translations CountryTranslation[]
+  states      State[]
+  addresses   Address[]      // Existing relation to be added
+  stores      Store[]        // Existing relation to be added
+
+  @@index([isActive])
+}
+
+model CountryTranslation {
+  id          String   @id @default(cuid())
+  countryId   String
+  languageId  String
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([countryId, languageId])
+}
+
+model State {
+  id          String   @id @default(cuid())
+  countryId   String
+  code        String   // e.g., CA, NY
+  name        String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  country     Country  @relation(fields: [countryId], references: [id])
+  translations StateTranslation[]
+  addresses   Address[]    // Existing relation to be added
+  stores      Store[]      // Existing relation to be added
+
+  @@unique([countryId, code])
+  @@index([isActive])
+}
+
+model StateTranslation {
+  id          String   @id @default(cuid())
+  stateId     String
+  languageId  String
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  state       State    @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([stateId, languageId])
+}
+
+model CountryLanguage {
+  id          String   @id @default(cuid())
+  countryId   String
+  languageId  String
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  country     Country  @relation(fields: [countryId], references: [id])
+  language    Language @relation(fields: [languageId], references: [id])
+
+  @@unique([countryId, languageId])
+  @@index([isActive])
+}
+
+model CountryCurrency {
+  id          String   @id @default(cuid())
+  countryId   String
+  currencyId  String
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  country     Country  @relation(fields: [countryId], references: [id])
+  currency    Currency @relation(fields: [currencyId], references: [id])
+
+  @@unique([countryId, currencyId])
+  @@index([isActive])
 }
 
