@@ -116,9 +116,8 @@ model Language {
   pageSectionTranslations PageSectionTranslation[]
   seoTranslations         SEOTranslation[]
   productCategoryTranslations ProductCategoryTranslation[]
-  countries           CountryLanguage[]
-  countryTranslations CountryTranslation[]
-  stateTranslations   StateTranslation[]
+  countryTranslations    CountryTranslation[]
+  stateTranslations      StateTranslation[]
 }
 
 model Translation {
@@ -352,9 +351,9 @@ model Product {
 model ProductTranslation {
   id          String   @id @default(cuid())
   productId   String
-  languageId  String
+  languageCode String  // Changed from languageId
   name        String
-  description String?
+  description String?  @db.Text
   metaTitle   String?
   metaDesc    String?
   keywords    String?
@@ -363,9 +362,9 @@ model ProductTranslation {
 
   // Relations
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  language    Language @relation(fields: [languageId], references: [id])
+  language    Language @relation(fields: [languageCode], references: [code]) // Changed reference
 
-  @@unique([productId, languageId])
+  @@unique([productId, languageCode])
 }
 
 model ProductVariation {
@@ -465,20 +464,19 @@ model Category {
 model CategoryTranslation {
   id          String   @id @default(cuid())
   categoryId  String
-  languageId  String
+  languageCode String
   name        String
-  description String?
+  description String?  @db.Text
   metaTitle   String?
   metaDesc    String?
   keywords    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  language    Language @relation(fields: [languageId], references: [id])
+  language    Language @relation(fields: [languageCode], references: [code])
 
-  @@unique([categoryId, languageId])
+  @@unique([categoryId, languageCode])
 }
 
 // Brand Related Models
@@ -791,9 +789,9 @@ enum ContactStatus {
 model ProductCategoryTranslation {
   id          String   @id @default(cuid())
   categoryId  String
-  languageId  String
+  languageCode String  // Changed from languageId
   name        String
-  description String?
+  description String?  @db.Text
   metaTitle   String?
   metaDesc    String?
   keywords    String?
@@ -802,9 +800,9 @@ model ProductCategoryTranslation {
 
   // Relations
   category    ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  language    Language       @relation(fields: [languageId], references: [id])
+  language    Language       @relation(fields: [languageCode], references: [code]) // Changed reference
 
-  @@unique([categoryId, languageId])
+  @@unique([categoryId, languageCode])
 }
 
 
@@ -938,16 +936,16 @@ model Country {
 model CountryTranslation {
   id          String   @id @default(cuid())
   countryId   String
-  languageId  String
+  languageCode String  // Changed from languageId
   name        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
-  language    Language @relation(fields: [languageId], references: [id])
+  language    Language @relation(fields: [languageCode], references: [code]) // Changed reference
 
-  @@unique([countryId, languageId])
+  @@unique([countryId, languageCode])
 }
 
 model State {
@@ -972,16 +970,16 @@ model State {
 model StateTranslation {
   id          String   @id @default(cuid())
   stateId     String
-  languageId  String
+  languageCode String  // Changed from languageId
   name        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   state       State    @relation(fields: [stateId], references: [id], onDelete: Cascade)
-  language    Language @relation(fields: [languageId], references: [id])
+  language    Language @relation(fields: [languageCode], references: [code]) // Changed reference
 
-  @@unique([stateId, languageId])
+  @@unique([stateId, languageCode])
 }
 
 model CountryLanguage {

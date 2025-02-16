@@ -25,6 +25,7 @@ import { useSettings } from '@core/hooks/useSettings'
 type LanguageDataType = {
   langCode: Locale
   langName: string
+  id: number
 }
 
 const getLocalePath = (pathName: string, locale: string) => {
@@ -38,14 +39,17 @@ const getLocalePath = (pathName: string, locale: string) => {
 
 const languageData: LanguageDataType[] = [
   {
+    id: 1,
     langCode: 'en',
     langName: 'English'
   },
   {
+    id: 2,
     langCode: 'fr',
     langName: 'French'
   },
   {
+    id: 3,
     langCode: 'ar',
     langName: 'Arabic'
   }
@@ -62,6 +66,7 @@ const LanguageDropdown = () => {
   const pathName = usePathname()
   const { settings } = useSettings()
   const { lang } = useParams()
+  // console.log('lang', lang)
 
   const handleClose = () => {
     setOpen(false)

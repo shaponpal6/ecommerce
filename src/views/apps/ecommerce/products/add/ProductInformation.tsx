@@ -1,6 +1,8 @@
 'use client'
 
 // MUI Imports
+import { useParams } from 'next/navigation'
+
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -23,6 +25,12 @@ import CustomIconButton from '@core/components/mui/IconButton'
 
 // Style Imports
 import '@/libs/styles/tiptapEditor.css'
+
+// Store Imports
+import { useDispatch, useSelector } from 'react-redux'
+
+import type { AppDispatch, RootState } from '@/redux-store'
+import { addTranslation, setBasicInfo, setLanguage } from '@/redux-store/slices/product'
 
 interface ProductInformationProps {
   initialProductName?: string
@@ -70,50 +78,6 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
       >
         <i className={classnames('ri-strikethrough', { 'text-textSecondary': !editor.isActive('strike') })} />
       </CustomIconButton>
-      <CustomIconButton
-        {...(editor.isActive({ textAlign: 'left' }) && { color: 'primary' })}
-        variant='outlined'
-        size='small'
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
-      >
-        <i className={classnames('ri-align-left', { 'text-textSecondary': !editor.isActive({ textAlign: 'left' }) })} />
-      </CustomIconButton>
-      <CustomIconButton
-        {...(editor.isActive({ textAlign: 'center' }) && { color: 'primary' })}
-        variant='outlined'
-        size='small'
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
-      >
-        <i
-          className={classnames('ri-align-center', {
-            'text-textSecondary': !editor.isActive({ textAlign: 'center' })
-          })}
-        />
-      </CustomIconButton>
-      <CustomIconButton
-        {...(editor.isActive({ textAlign: 'right' }) && { color: 'primary' })}
-        variant='outlined'
-        size='small'
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
-      >
-        <i
-          className={classnames('ri-align-right', {
-            'text-textSecondary': !editor.isActive({ textAlign: 'right' })
-          })}
-        />
-      </CustomIconButton>
-      <CustomIconButton
-        {...(editor.isActive({ textAlign: 'justify' }) && { color: 'primary' })}
-        variant='outlined'
-        size='small'
-        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-      >
-        <i
-          className={classnames('ri-align-justify', {
-            'text-textSecondary': !editor.isActive({ textAlign: 'justify' })
-          })}
-        />
-      </CustomIconButton>
     </div>
   )
 }
@@ -124,6 +88,11 @@ const ProductInformation = ({
   initialBarcode = '0123-4567',
   initialDescription = ''
 }: ProductInformationProps) => {
+  const { lang } = useParams()
+  const dispatch = useDispatch<AppDispatch>()
+  const { translations, sku, barcode, currentProduct, language } = useSelector((state: RootState) => state.productReducer)
+  const languageId = language.id;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -138,6 +107,27 @@ const ProductInformation = ({
     content: initialDescription
   })
 
+  // Update handlers to use Redux
+  editor?.on('update', ({ editor }) => {
+    handleContentChange('desc', editor.getHTML())
+  })
+
+  const handleProductChange = (field: string, value: string) => {
+    dispatch(setBasicInfo({ [field]: value }))
+  }
+
+  const handleContentChange = (field: string, value: string) => {
+    console.log('translations', translations)
+    const updatedTranslation = { ...translations[languageId], [field]: value }
+
+    console.log('final', { languageId, ...updatedTranslation })
+    dispatch(addTranslation({ languageId, ...updatedTranslation }))
+  }
+
+  const handleChangeLanguage = (newLanguage: Language) => {
+    dispatch(setLanguage(newLanguage));
+  };
+
   return (
     <Card>
       <CardHeader title='Product Information' />
@@ -149,6 +139,7 @@ const ProductInformation = ({
               label='Product Name'
               placeholder='iPhone 14'
               defaultValue={initialProductName}
+              onChange={(e) => handleContentChange('name', e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -157,6 +148,7 @@ const ProductInformation = ({
               label='SKU'
               placeholder='FXSK123U'
               defaultValue={initialSKU}
+              onChange={(e) => handleProductChange('sku', e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -165,16 +157,16 @@ const ProductInformation = ({
               label='Barcode'
               placeholder='0123-4567'
               defaultValue={initialBarcode}
+              onChange={(e) => handleProductChange('barcode', e.target.value)}
             />
           </Grid>
         </Grid>
         <Typography className='mbe-1'>Description (Optional)</Typography>
         <Card className='p-0 border shadow-none'>
-          <CardContent className='p-0'>
-            <EditorToolbar editor={editor} />
-            <Divider className='mli-5' />
-            <EditorContent editor={editor} className='bs-[135px] overflow-y-auto flex ' />
-          </CardContent>
+          <EditorContent
+            editor={editor}
+            className='bs-[135px] overflow-y-auto flex '
+          />
         </Card>
       </CardContent>
     </Card>

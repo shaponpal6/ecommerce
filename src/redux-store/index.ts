@@ -6,13 +6,15 @@ import chatReducer from '@/redux-store/slices/chat'
 import calendarReducer from '@/redux-store/slices/calendar'
 import kanbanReducer from '@/redux-store/slices/kanban'
 import emailReducer from '@/redux-store/slices/email'
+import productReducer from '@/redux-store/slices/product'
 
 export const store = configureStore({
   reducer: {
     chatReducer,
     calendarReducer,
     kanbanReducer,
-    emailReducer
+    emailReducer,
+    productReducer
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware({ serializableCheck: false })
 })

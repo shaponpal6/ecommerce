@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 
+import { useDispatch, useSelector } from 'react-redux'
+
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
@@ -18,6 +21,9 @@ import TabPanel from '@mui/lab/TabPanel'
 import Grid from '@mui/material/Grid'
 
 import { useDropzone } from 'react-dropzone'
+
+import { setMainImage, addGalleryImage, removeGalleryImage } from '@/redux-store/slices/product'
+import type { AppDispatch, RootState } from '@/redux-store'
 
 import CustomTabList from '@core/components/mui/TabList'
 import Link from '@components/Link'
@@ -61,9 +67,11 @@ const ImagePreview = styled('div')(({ theme }) => ({
 }))
 
 const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: ProductImageProps) => {
+  const dispatch = useDispatch<AppDispatch>()
+  // const { mainImage, galleryImages } = useSelector((state: RootState) => state.product)
   const [activeTab, setActiveTab] = useState('main')
-  const [mainImage, setMainImage] = useState<ImageFile | null>(null)
-  const [galleryImages, setGalleryImages] = useState<ImageFile[]>([])
+  const [mainImageState, setMainImageState] = useState<ImageFile | null>(null)
+  const [galleryImagesState, setGalleryImagesState] = useState<ImageFile[]>([])
 
   useEffect(() => {
     // Initialize with default values if provided
@@ -73,7 +81,7 @@ const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: Prod
         .then(blob => {
           const file = new File([blob], 'main-image.jpg', { type: 'image/jpeg' })
 
-          setMainImage(Object.assign(file, { preview: defaultImage }))
+          setMainImageState(Object.assign(file, { preview: defaultImage }))
         })
     }
 
@@ -89,7 +97,7 @@ const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: Prod
               return Object.assign(file, { preview: url })
             })
         )
-      ).then(files => setGalleryImages(files))
+      ).then(files => setGalleryImagesState(files))
     }
   }, [defaultImage, defaultGallery])
 
@@ -101,8 +109,8 @@ const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: Prod
         preview: URL.createObjectURL(acceptedFiles[0])
       })
 
-      setMainImage(file)
-      onImageChange?.(file, galleryImages)
+      setMainImageState(file)
+      onImageChange?.(file, galleryImagesState)
     }
   })
 
@@ -115,21 +123,29 @@ const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: Prod
         })
       )
 
-      setGalleryImages(prev => [...prev, ...newFiles])
-      onImageChange?.(mainImage, [...galleryImages, ...newFiles])
+      setGalleryImagesState(prev => [...prev, ...newFiles])
+      onImageChange?.(mainImageState, [...galleryImagesState, ...newFiles])
     }
   })
 
   const handleRemoveMainImage = () => {
-    setMainImage(null)
-    onImageChange?.(null, galleryImages)
+    setMainImageState(null)
+    onImageChange?.(null, galleryImagesState)
   }
 
   const handleRemoveGalleryImage = (index: number) => {
-    const newGallery = galleryImages.filter((_, i) => i !== index)
+    const newGallery = galleryImagesState.filter((_, i) => i !== index)
 
-    setGalleryImages(newGallery)
-    onImageChange?.(mainImage, newGallery)
+    setGalleryImagesState(newGallery)
+    onImageChange?.(mainImageState, newGallery)
+  }
+
+  const handleMainImageChange = (file: File) => {
+    dispatch(setMainImage({
+      type: 'image',
+      url: URL.createObjectURL(file),
+      sortOrder: 0
+    }))
   }
 
   return (
@@ -149,9 +165,9 @@ const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: Prod
             <Dropzone>
               <div {...mainDropzone.getRootProps({ className: 'dropzone' })}>
                 <input {...mainDropzone.getInputProps()} />
-                {mainImage ? (
+                {mainImageState ? (
                   <ImagePreview>
-                    <img src={mainImage.preview} alt='Main product' />
+                    <img src={mainImageState.preview} alt='Main product' />
                     <IconButton
                       onClick={handleRemoveMainImage}
                       sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper' }}
@@ -186,9 +202,9 @@ const ProductImage = ({ defaultImage, defaultGallery = [], onImageChange }: Prod
               </div>
             </Dropzone>
 
-            {galleryImages.length > 0 && (
+            {galleryImagesState.length > 0 && (
               <Grid container spacing={2} className='mbs-4'>
-                {galleryImages.map((file, index) => (
+                {galleryImagesState.map((file, index) => (
                   <Grid key={index} xs={12} sm={6} md={4}>
                     <ImagePreview>
                       <img src={file.preview} alt={`Gallery ${index + 1}`} />
